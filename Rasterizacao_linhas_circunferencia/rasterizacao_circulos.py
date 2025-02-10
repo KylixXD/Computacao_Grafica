@@ -31,13 +31,11 @@ def rasterizar_circulo_parametrico(xc, yc, r):
 
 def rasterizar_circulo_incremental(xc, yc, r):
     pontos = []
-
     x = r
     y = 0
     theta = 1 / r  # Incremento angular
     C = math.cos(theta)
     S = math.sin(theta)
-
     while y < x:
         # Adiciona os 8 pontos simétricos
         pontos.extend([
@@ -46,12 +44,10 @@ def rasterizar_circulo_incremental(xc, yc, r):
             (round(xc + y), round(yc + x)), (round(xc - y), round(yc + x)),
             (round(xc + y), round(yc - x)), (round(xc - y), round(yc - x))
         ])
-
         # Atualiza os valores de x e y usando a fórmula incremental
         xt = x 
         x = x * C - y * S
         y = y * C + xt * S
-
     return pontos
 
 
@@ -96,7 +92,7 @@ xc, yc = 20, 20  # Centro da circunferência no grid
 
 r = 18
 
-# Rasterizar com o método desejado 
+# Rasterizar com o método desejado(descomente apenas uma função)
 # pontos = rasterizar_circulo_parametrico(xc, yc, r)
 pontos = rasterizar_circulo_incremental(xc, yc, r)
 # pontos = rasterizar_circulo_bresenham(xc, yc, r)
@@ -108,18 +104,11 @@ while rodando:
         if evento.type == pygame.QUIT:
             rodando = False
 
-    # Preenche a tela com branco
     tela.fill(BRANCO)
-
-    # Desenha o grid
     desenhar_grid()
-
-    # Desenha os pontos rasterizados
     desenhar_pontos(pontos, PRETO)
-
-    # Atualiza a tela
     pygame.display.flip()
 
-# Encerra o Pygame
+
 pygame.quit()
 sys.exit()

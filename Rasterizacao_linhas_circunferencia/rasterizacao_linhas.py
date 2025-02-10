@@ -53,7 +53,6 @@ def rasterizar_linha_dda(x0, y0, x1, y1):
 
 def rasterizar_linha_bresenham(x0, y0, x1, y1):
     pontos = []
-
     dx = abs(x1 - x0)
     dy = abs(y1 - y0)
     sx = 1 if x0 < x1 else -1
@@ -70,7 +69,6 @@ def rasterizar_linha_bresenham(x0, y0, x1, y1):
         if e2 < dx:
             p += dx
             y0 += sy
-    
     return pontos
 
 
@@ -125,18 +123,10 @@ while rodando:
         if evento.type == pygame.QUIT:
             rodando = False
 
-    # Preenche a tela com branco
     tela.fill(BRANCO)
-
-    # Desenha o grid
     desenhar_grid()
-
-    # Desenha os pontos rasterizados
     desenhar_pontos(pontos, PRETO)
-
-    # Atualiza a tela
     pygame.display.flip()
 
-# Encerra o Pygame
 pygame.quit()
 sys.exit()
