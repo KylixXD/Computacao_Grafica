@@ -52,20 +52,27 @@ def rasterizar_linha_dda(x0, y0, x1, y1):
     return pontos
 
 def rasterizar_linha_bresenham(x0, y0, x1, y1):
-    pontos = []    
-    dx = x1 - x0
-    dy = y1 - y0
-    y = y0
-    p = 2 * dy - dx
-    for x in range(x0, x1 + 1):
-        pontos.append((x, y))
-        if p >= 0:
-            y += 1
-            p += 2 * (dy - dx)
-        else:
-            p += 2 * dy
+    pontos = []
 
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    p = dx - dy
+    while True:
+        pontos.append((x0, y0))
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = 2 * p
+        if e2 > -dy:
+            p -= dy
+            x0 += sx
+        if e2 < dx:
+            p += dx
+            y0 += sy
+    
     return pontos
+
 
 
 # Converte coordenadas para o grid reduzido
@@ -86,16 +93,16 @@ def desenhar_pontos(pontos, cor):
 
 # Coordenadas das linhas (descomente apenas uma coordenada)
 #Linha Diagonal
-x0, y0 =  1, 1   
-x1, y1 = 15, 18  
+# x0, y0 =  1, 1   
+# x1, y1 = 15, 18  
 
 # Linha com Inclinação de 45º
 # x0, y0 = 3, 15
 # x1, y1 = 15, 5
 
 # Linha quase verticais 
-# x0, y0 = 10, 2
-# x1, y1 = 12, 18
+x0, y0 = 10, 2
+x1, y1 = 12, 18
 
 # # Linha na Horizontal
 # x0, y0 =  1, 10
