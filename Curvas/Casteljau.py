@@ -23,21 +23,24 @@ def bezier_curve_casteljau(control_points, num_points=100):
     t_values = np.linspace(0, 1, num_points)
     return [casteljau_recursive(control_points, t) for t in t_values]
 
-def subdivide_casteljau(P):
-    """Realiza a subdivisão da curva de Bézier usando o algoritmo de De Casteljau."""
-    M01 = (P[0] + P[1]) / 2
-    M12 = (P[1] + P[2]) / 2
-    M23 = (P[2] + P[3]) / 2
+def subdivide_casteljau_iterativo(control_points, t=0.5):
+    """Subdivide a curva de Bézier usando o algoritmo de De Casteljau de forma iterativa."""
+    n = len(control_points)
+    points = np.array(control_points, dtype=float)
+    
+    # Armazena os pontos intermediários em cada etapa da subdivisão
+    subdivision_steps = [points]
+    
+    while len(points) > 1:
+        points = np.array([(1 - t) * points[i] + t * points[i + 1] for i in range(len(points) - 1)])
+        subdivision_steps.append(points)
 
-    M012 = (M01 + M12) / 2
-    M123 = (M12 + M23) / 2
+    # Os pontos intermediários podem ser usados para formar as duas curvas
+    left_curve = [step[0] for step in subdivision_steps]
+    right_curve = [step[-1] for step in subdivision_steps]
 
-    M0123 = (M012 + M123) / 2
+    return left_curve, right_curve, subdivision_steps[-1][0]  # O ponto médio da curva
 
-    left_curve = [P[0], M01, M012, M0123]
-    right_curve = [M0123, M123, M23, P[3]]
-
-    return left_curve, right_curve, M0123
 
 def draw_curve(screen, curve_points, progress):
     """Desenha a curva de Bézier na tela com animação suave."""
@@ -54,7 +57,7 @@ def draw_control_polygon(screen, control_points):
 
 def draw_subdivision(screen, P):
     """Desenha as subdivisões da curva Bézier."""
-    left, right, midpoint = subdivide_casteljau(P)
+    left, right, midpoint = subdivide_casteljau_iterativo(P)
 
     pygame.draw.circle(screen, MIDPOINT_COLOR, (int(midpoint[0]), int(midpoint[1])), 5)
     pygame.draw.lines(screen, CURVE_COLOR, False, left, 2)
