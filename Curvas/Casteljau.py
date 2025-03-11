@@ -11,39 +11,39 @@ LINE_COLOR = (100, 100, 100)
 FPS = 60
 pygame.display.set_caption("Bezier Casteljau")
 
-def ponto_medio(p1, p2):
-    """Calcula o ponto médio entre dois pontos."""
-    return (p1 + p2) / 2
+def casteljau_recursive(points, t):
+    """Algoritmo de De Casteljau de forma recursiva para calcular um ponto na curva de Bézier."""
+    if len(points) == 1:
+        return np.array(points[0])
+    new_points = [np.array((1 - t) * np.array(points[i]) + t * np.array(points[i + 1])) for i in range(len(points) - 1)]
+    return casteljau_recursive(new_points, t)
 
-def divide_pontos_curva(pontos, profundidade_atual):
-    """Realiza a subdivisão recursiva da curva de Bézier baseado na profundidade limitada entre 0 e 1."""
-    if profundidade_atual <= 0:
-        return pontos
-    
-    m01 = ponto_medio(pontos[0], pontos[1])
-    m12 = ponto_medio(pontos[1], pontos[2])
-    m23 = ponto_medio(pontos[2], pontos[3])
+def bezier_curve_casteljau(control_points, num_points=100):
+    """Gera os pontos da curva de Bézier usando o algoritmo de Casteljau."""
+    t_values = np.linspace(0, 1, num_points)
+    return [casteljau_recursive(control_points, t) for t in t_values]
 
-    m012 = ponto_medio(m01, m12)
-    m123 = ponto_medio(m12, m23)
-    ponto_medio_curva = ponto_medio(m012, m123)
+def subdivide_casteljau(P):
+    """Realiza a subdivisão da curva de Bézier usando o algoritmo de De Casteljau."""
+    M01 = (P[0] + P[1]) / 2
+    M12 = (P[1] + P[2]) / 2
+    M23 = (P[2] + P[3]) / 2
 
-    pontos_curva1 = [pontos[0], m01, m012, ponto_medio_curva]
-    pontos_curva2 = [ponto_medio_curva, m123, m23, pontos[3]]
+    M012 = (M01 + M12) / 2
+    M123 = (M12 + M23) / 2
 
-    pontos_curva1 = divide_pontos_curva(pontos_curva1, profundidade_atual - 0.1)
-    pontos_curva2 = divide_pontos_curva(pontos_curva2, profundidade_atual - 0.1)
+    M0123 = (M012 + M123) / 2
 
-    return pontos_curva1 + pontos_curva2
+    left_curve = [P[0], M01, M012, M0123]
+    right_curve = [M0123, M123, M23, P[3]]
 
-def draw_curve_by_depth(screen, pontos_controle, profundidade, progress):
-    """Desenha a curva de Bézier com animação baseada na profundidade."""
-    profundidade = max(0, min(profundidade, 1))  # Limita profundidade entre 0 e 1
-    if len(pontos_controle) == 4:
-        pontos_curva = divide_pontos_curva(pontos_controle, profundidade)
-        num_points = int(len(pontos_curva) * progress)
-        if num_points > 1:
-            pygame.draw.lines(screen, CURVE_COLOR, False, pontos_curva[:num_points], 2)
+    return left_curve, right_curve, M0123
+
+def draw_curve(screen, curve_points, progress):
+    """Desenha a curva de Bézier na tela com animação suave."""
+    num_points = int(len(curve_points) * progress)
+    for i in range(num_points - 1):
+        pygame.draw.line(screen, CURVE_COLOR, curve_points[i], curve_points[i + 1], 2)
 
 def draw_control_polygon(screen, control_points):
     """Desenha os pontos de controle e suas conexões."""
@@ -51,6 +51,16 @@ def draw_control_polygon(screen, control_points):
         pygame.draw.line(screen, LINE_COLOR, control_points[i], control_points[i + 1], 1)
     for point in control_points:
         pygame.draw.circle(screen, CONTROL_COLOR, (int(point[0]), int(point[1])), 5)
+
+def draw_subdivision(screen, P):
+    """Desenha as subdivisões da curva Bézier."""
+    left, right, midpoint = subdivide_casteljau(P)
+
+    pygame.draw.circle(screen, MIDPOINT_COLOR, (int(midpoint[0]), int(midpoint[1])), 5)
+    pygame.draw.lines(screen, CURVE_COLOR, False, left, 2)
+    pygame.draw.lines(screen, CURVE_COLOR, False, right, 2)
+
+    return left, right
 
 def main():
     pygame.init()
